@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChatLog, RetrievedDoc } from "@/lib/types";
+import type { ChatLog, RetrievedDoc } from "@/lib/api";
 import { X, ThumbsUp, ThumbsDown } from "lucide-react";
 
 interface ChatDetailModalProps {
@@ -130,7 +130,7 @@ export function maskPhone(phone: string): string {
   return phone.slice(0, 5) + "****" + phone.slice(-3);
 }
 
-export function StatusBadge({ status }: { status: ChatLog["status"] }) {
+export function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     success:
       "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",

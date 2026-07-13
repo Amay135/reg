@@ -1,10 +1,31 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { LogIn, Eye, EyeOff } from "lucide-react";
+import { login } from "@/lib/api";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("admin123");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await login(email, password);
+      router.push("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login gagal");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-full flex items-center justify-center p-6">
@@ -23,10 +44,7 @@ export default function LoginPage() {
         </div>
 
         {/* Form */}
-        <form
-          className="space-y-4"
-          onSubmit={(e) => e.preventDefault()}
-        >
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="email"
@@ -37,7 +55,10 @@ export default function LoginPage() {
             <input
               id="email"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@example.com"
+              required
               className="w-full px-3 py-2.5 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-zinc-400"
             />
           </div>
@@ -53,7 +74,10 @@ export default function LoginPage() {
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                required
                 className="w-full px-3 py-2.5 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-zinc-400 pr-10"
               />
               <button
@@ -67,16 +91,23 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {error && (
+            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
-            className="w-full py-2.5 rounded-lg bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-colors dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            disabled={loading}
+            className="w-full py-2.5 rounded-lg bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
-            Sign In
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
         <p className="text-xs text-center text-zinc-400">
-          Demo dashboard — authentication simulated
+          Login dengan akun admin untuk mengakses dashboard
         </p>
       </div>
     </div>

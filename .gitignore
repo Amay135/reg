@@ -1,0 +1,42 @@
+# Environment files (JANGAN commit .env!)
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+venv/
+.venv/
+*.egg
+dist/
+build/
+
+# Database / Storage
+*.db
+*.sqlite3
+chroma_data/
+uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# WA Gateway
+wa-gateway/auth_info/
+wa-gateway/node_modules/
+
+# Frontend
+frontend/.next/
+frontend/node_modules/
+
+# Misc
+*.log

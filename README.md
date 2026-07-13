@@ -176,7 +176,3 @@ GitHub:
 https://github.com/Amay135
 
 ---
-
-## License
-
-This project is licensed under the MIT License.

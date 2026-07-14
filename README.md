@@ -24,7 +24,7 @@ An AI-powered Retrieval-Augmented Generation (RAG) chatbot that enables users to
 ## Technology Stack
 
 ### Frontend
-- React
+- Nextjs
 - Tailwind CSS
 - Vite
 
@@ -38,7 +38,7 @@ An AI-powered Retrieval-Augmented Generation (RAG) chatbot that enables users to
 - Retrieval-Augmented Generation (RAG)
 
 ### Database
-- MongoDB
+- PostgreSQL
 
 ### WhatsApp Gateway
 - Baileys

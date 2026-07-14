@@ -1,5 +1,3 @@
-import uuid
-
 import chromadb
 from chromadb.config import Settings as ChromaSettings
 

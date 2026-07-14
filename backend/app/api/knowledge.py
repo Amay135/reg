@@ -121,6 +121,45 @@ async def upload_document(
     }
 
 
+@router.delete("/{doc_id}")
+async def delete_document(
+    doc_id: str,
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Delete a document from the knowledge base."""
+    # Find the document record
+    result = await db.execute(
+        select(KnowledgeDoc).where(KnowledgeDoc.id == doc_id)
+    )
+    doc = result.scalar_one_or_none()
+
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Dokumen tidak ditemukan",
+        )
+
+    # Remove from vector store
+    try:
+        vector_store.delete_document(doc_id)
+    except Exception:
+        pass  # best-effort; don't block DB cleanup
+
+    # Remove file from disk
+    if os.path.exists(doc.file_path):
+        try:
+            os.remove(doc.file_path)
+        except OSError:
+            pass  # best-effort
+
+    # Remove DB record
+    await db.delete(doc)
+    await db.commit()
+
+    return {"message": f"Dokumen '{doc.filename}' berhasil dihapus"}
+
+
 @router.post("/reindex", response_model=ReindexResponse)
 async def reindex_all(
     db: AsyncSession = Depends(get_db),

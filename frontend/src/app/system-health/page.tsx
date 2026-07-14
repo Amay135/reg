@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Server, Wifi, Database, Cpu } from "lucide-react";
+import { Server, Wifi, Database, Cpu } from "lucide-react";
 import {
   fetchServices,
   fetchLatency,

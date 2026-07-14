@@ -19,7 +19,6 @@ const {
   DisconnectReason,
   makeCacheableSignalKeyStore,
   fetchLatestBaileysVersion,
-  makeInMemoryStore,
 } = require("@whiskeysockets/baileys");
 const pino = require("pino");
 const qrcode = require("qrcode-terminal");
@@ -58,7 +57,7 @@ async function start() {
   }
 
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
-  const { version } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1023223821] }));
+  const { version } = await fetchLatestBaileysVersion();
 
   sock = makeWASocket({
     version,

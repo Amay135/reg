@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Upload, FileText, HardDrive, Layers, RefreshCw } from "lucide-react";
+import { Upload, FileText, HardDrive, Layers, RefreshCw, Trash2 } from "lucide-react";
 import {
   fetchDocuments,
   uploadDocument,
+  deleteDocument,
   reindexAll,
   type KnowledgeDoc,
 } from "@/lib/api";
@@ -22,6 +23,8 @@ export default function KnowledgeBasePage() {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function loadDocs() {
@@ -78,6 +81,74 @@ export default function KnowledgeBasePage() {
     }
   }
 
+  function toggleSelectAll() {
+    if (selectedIds.size === docs.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(docs.map((d) => d.id)));
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  async function handleDeleteSelected() {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Hapus ${selectedIds.size} dokumen terpilih? Tindakan ini tidak dapat dibatalkan.`)) return;
+
+    setDeleting(true);
+    setMessage("");
+    setError("");
+    let success = 0;
+    let failed = 0;
+
+    for (const id of selectedIds) {
+      try {
+        await deleteDocument(id);
+        success++;
+      } catch {
+        failed++;
+      }
+    }
+
+    setSelectedIds(new Set());
+    setDeleting(false);
+    if (success > 0) setMessage(`${success} dokumen berhasil dihapus.`);
+    if (failed > 0) setError(`${failed} dokumen gagal dihapus.`);
+    await loadDocs();
+  }
+
+  async function handleDeleteOne(id: string, filename: string) {
+    if (!confirm(`Hapus "${filename}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+
+    setDeleting(true);
+    setMessage("");
+    setError("");
+    try {
+      const result = await deleteDocument(id);
+      setMessage(result.message);
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Hapus gagal");
+    } finally {
+      setDeleting(false);
+      await loadDocs();
+    }
+  }
+
   const totalChunks = docs.reduce((s, d) => s + d.chunks, 0);
   const totalSize = docs.reduce((s, d) => s + d.size_bytes, 0);
 
@@ -101,6 +172,16 @@ export default function KnowledgeBasePage() {
             accept=".pdf,.docx,.txt"
             className="hidden"
           />
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleDeleteSelected}
+              disabled={deleting}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Trash2 size={16} />
+              {deleting ? "Menghapus..." : `Hapus (${selectedIds.size})`}
+            </button>
+          )}
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
@@ -188,6 +269,14 @@ export default function KnowledgeBasePage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+                <th className="text-left px-4 py-3 w-10">
+                  <input
+                    type="checkbox"
+                    checked={docs.length > 0 && selectedIds.size === docs.length}
+                    onChange={toggleSelectAll}
+                    className="rounded border-zinc-300 dark:border-zinc-700"
+                  />
+                </th>
                 <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">
                   Filename
                 </th>
@@ -200,6 +289,7 @@ export default function KnowledgeBasePage() {
                 <th className="text-left px-4 py-3 font-semibold text-zinc-600 dark:text-zinc-400">
                   Indexed At
                 </th>
+                <th className="text-left px-4 py-3 w-10" />
               </tr>
             </thead>
             <tbody>
@@ -208,6 +298,14 @@ export default function KnowledgeBasePage() {
                   key={doc.id}
                   className="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                 >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(doc.id)}
+                      onChange={() => toggleSelect(doc.id)}
+                      className="rounded border-zinc-300 dark:border-zinc-700"
+                    />
+                  </td>
                   <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
                     {doc.filename}
                   </td>
@@ -219,6 +317,16 @@ export default function KnowledgeBasePage() {
                     {doc.indexed_at
                       ? new Date(doc.indexed_at).toLocaleString("id-ID")
                       : "-"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => handleDeleteOne(doc.id, doc.filename)}
+                      disabled={deleting}
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                      title="Hapus dokumen"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </td>
                 </tr>
               ))}

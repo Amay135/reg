@@ -54,11 +54,7 @@ def query_rag(question: str) -> dict:
         answer = llm_service.generate(SYSTEM_PROMPT, user_prompt)
 
         # 4. Calculate metrics
-        avg_similarity = (
-            sum(d["similarity_score"] for d in retrieved_docs) / len(retrieved_docs)
-            if retrieved_docs
-            else 0.0
-        )
+        avg_similarity = sum(d["similarity_score"] for d in retrieved_docs) / len(retrieved_docs)
         elapsed_ms = (time.time() - start_time) * 1000
 
         # Determine status
@@ -77,7 +73,7 @@ def query_rag(question: str) -> dict:
             "status": status,
         }
 
-    except Exception as e:
+    except Exception:
         elapsed_ms = (time.time() - start_time) * 1000
         return {
             "answer": f"Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti.",

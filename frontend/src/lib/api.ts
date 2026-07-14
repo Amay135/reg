@@ -109,8 +109,8 @@ export interface ChatLog {
   answer: string;
   retrieved_docs: RetrievedDoc[];
   response_time_ms: number;
-  status: string;
-  feedback?: string | null;
+  status: "success" | "failed" | "low_confidence";
+  feedback?: "like" | "dislike" | null;
   created_at: string;
 }
 
@@ -304,6 +304,11 @@ export async function uploadDocument(file: File): Promise<unknown> {
     );
   }
 
+  return res.json();
+}
+
+export async function deleteDocument(id: string): Promise<{ message: string }> {
+  const res = await fetchWithAuth(`/knowledge/${id}`, { method: "DELETE" });
   return res.json();
 }
 

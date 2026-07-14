@@ -17,7 +17,7 @@ router = APIRouter(prefix="/logs", tags=["logs"])
 @router.get("", response_model=ChatLogListResponse)
 async def list_logs(
     search: str = Query("", description="Search in question, answer, sender"),
-    status: str = Query("", description="Filter by status"),
+    status_filter: str = Query("", description="Filter by status"),
     date_from: str = Query("", description="Start date (YYYY-MM-DD)"),
     date_to: str = Query("", description="End date (YYYY-MM-DD)"),
     page: int = Query(1, ge=1),
@@ -37,9 +37,9 @@ async def list_logs(
         query = query.where(search_filter)
         count_query = count_query.where(search_filter)
 
-    if status:
-        query = query.where(ChatLog.status == status)
-        count_query = count_query.where(ChatLog.status == status)
+    if status_filter:
+        query = query.where(ChatLog.status == status_filter)
+        count_query = count_query.where(ChatLog.status == status_filter)
 
     if date_from:
         try:

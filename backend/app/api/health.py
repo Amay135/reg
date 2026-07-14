@@ -41,13 +41,11 @@ async def get_service_health(
     # Vector DB check (ChromaDB)
     vdb_start = time.time()
     try:
-        count = vector_store.count()
         vdb_latency = (time.time() - vdb_start) * 1000
         vdb_status = "online"
     except Exception:
         vdb_latency = 0
         vdb_status = "offline"
-        count = 0
 
     # LLM check — just report configured status; actual check requires an API call
     llm_status = "online" if settings.openai_api_key or settings.deepseek_api_key or settings.llm_provider == "ollama" else "offline"

@@ -1,4 +1,7 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -50,17 +53,13 @@ async def whatsapp_webhook(
 
 @router.post("/feedback/{log_id}")
 async def submit_feedback(
-    log_id: str,
+    log_id: UUID,
     feedback: str,  # "like" or "dislike"
     db: AsyncSession = Depends(get_db),
 ):
     """Submit feedback for a chat response. Called by WA Gateway when user rates."""
-    from uuid import UUID
-
-    from sqlalchemy import select
-
     result = await db.execute(
-        select(ChatLog).where(ChatLog.id == UUID(log_id))
+        select(ChatLog).where(ChatLog.id == log_id)
     )
     log = result.scalar_one_or_none()
 

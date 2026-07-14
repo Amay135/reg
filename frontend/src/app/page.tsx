@@ -80,11 +80,7 @@ export default function OverviewPage() {
         ).toFixed(0)
       : "0";
 
-  const successRate = stats.total_conversations_today > 0
-    ? Math.round(
-        ((stats.total_conversations_today - 0) / Math.max(stats.total_conversations_today, 1)) * 100
-      )
-    : 0;
+  // Success rate requires success/failure breakdown from API (not yet available)
 
   // Filter hourly to only show hours with data (non-zero)
   const hourlyWithData = hourly.filter((h) => h.count > 0);
@@ -124,9 +120,9 @@ export default function OverviewPage() {
           icon={Clock}
         />
         <StatCard
-          title="Success Rate"
-          value={`${successRate}%`}
-          subtitle="Successful responses"
+          title="Yesterday"
+          value={stats.total_conversations_yesterday}
+          subtitle="Conversations yesterday"
           icon={TrendingUp}
         />
       </div>
